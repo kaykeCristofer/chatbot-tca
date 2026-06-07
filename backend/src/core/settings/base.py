@@ -4,7 +4,10 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # parent  → settings/
 # parent  → core/
-# parent  → src/        
+# parent  → src/    
+
+DATA_DIR =  BASE_DIR / "../data"
+os.makedirs(DATA_DIR, exist_ok=True)
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 # Sobrescrito em development.py e production.py
@@ -24,7 +27,7 @@ INSTALLED_APPS = [
     # 3 apps
     'ninja',
     #myapps
-
+    'chatbot',
 ]
 
 MIDDLEWARE = [
