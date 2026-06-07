@@ -13,11 +13,12 @@ services:
       - "8000:8000"
     volumes:
       - ./src:/app/src             # hot-reload em dev
-      - sqlite_data:/app/data      # persiste o SQLite entre restarts
+      - ./data:/app/data           # persiste o SQLite entre restarts
     env_file:
       - .env
     environment:
-      - DJANGO_SETTINGS_MODULE=core.settings.development
+      PYTHONPATH: /app/src
+      DJANGO_SETTINGS_MODULE: ${DJANGO_SETTINGS_MODULE:-core.settings.development}
     depends_on:
       db:
         condition: service_healthy
@@ -33,7 +34,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-chatbot}
       POSTGRES_USER: ${POSTGRES_USER:-chatbot_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-chatbot_password}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -46,5 +47,4 @@ services:
 
 
 volumes:
-  sqlite_data:
   postgres_data:

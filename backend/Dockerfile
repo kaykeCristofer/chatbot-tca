@@ -4,7 +4,8 @@
 FROM python:3.12-slim AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/src
 
 WORKDIR /app
 
@@ -14,7 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
 
 # ==========================================
@@ -22,13 +24,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # ==========================================
 FROM base AS development
 
-# Código injetado via volume no docker-compose
-# --reload habilita hot-reload ao salvar arquivos
-CMD ["uvicorn", "core.asgi:application", \
-     "--host", "0.0.0.0", \
-     "--port", "8000", \
-     "--reload", \
-     "--app-dir", "src"]
+COPY ./src ./src
+
+EXPOSE 8000
+
+CMD ["python", "-m", "uvicorn", "core.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
 
 # ==========================================
@@ -38,14 +38,11 @@ FROM base AS production
 
 COPY ./src ./src
 
-RUN adduser --disabled-password --no-create-home django_user && \
+RUN adduser --disabled-password --gecos "" django_user && \
     chown -R django_user:django_user /app
 
 USER django_user
 
-# Uvicorn + ASGI — essencial para async funcionar em produção
-CMD ["uvicorn", "core.asgi:application", \
-     "--host", "0.0.0.0", \
-     "--port", "8000", \
-     "--workers", "4", \
-     "--app-dir", "src"]
+EXPOSE 8000
+
+CMD ["python", "-m", "uvicorn", "core.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
