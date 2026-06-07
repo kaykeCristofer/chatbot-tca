@@ -301,7 +301,13 @@ export default function ChatBox() {
               aria-label={theme === "dark" ? "Ativar tema claro" : "Ativar tema escuro"}
               title={theme === "dark" ? "Tema claro" : "Tema escuro"}
             >
-              <span className="button-symbol">{theme === "dark" ? "☼" : "☾"}</span>
+              <span
+                className={`button-symbol ${
+                  theme === "dark" ? "sun-symbol" : "moon-symbol"
+                }`}
+              >
+                {theme === "dark" ? "☼" : "☪︎"}
+              </span>
             </button>
             <button
               className="icon-button danger"
@@ -324,7 +330,7 @@ export default function ChatBox() {
                 <p>
                   {sessionId
                     ? "Envie sua primeira mensagem para começar."
-                    : "Digite uma mensagem para iniciar uma sessão automaticamente."}
+                    : "Digite uma mensagem para iniciar uma sessão."}
                 </p>
               </div>
             )}
