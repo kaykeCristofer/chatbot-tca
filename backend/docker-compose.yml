@@ -1,0 +1,50 @@
+# docker-compose.yml
+
+services:
+
+  # ==========================================
+  # SERVIÇO: APLICAÇÃO
+  # ==========================================
+  app:
+    build:
+      context: .
+      target: development          # troca para 'production' no deploy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src             # hot-reload em dev
+      - sqlite_data:/app/data      # persiste o SQLite entre restarts
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings.development
+    depends_on:
+      db:
+        condition: service_healthy
+        required: false            # não quebra se não tiver db (modo SQLite)
+
+  # ==========================================
+  # SERVIÇO: POSTGRES (só sobe com --profile postgres)
+  # ==========================================
+  db:
+    image: postgres:16-alpine
+    profiles:
+      - postgres                   # só ativo com: docker compose --profile postgres up
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-chatbot}
+      POSTGRES_USER: ${POSTGRES_USER:-chatbot_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-chatbot_user}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"                # expõe só em dev, remover em prod
+
+
+volumes:
+  sqlite_data:
+  postgres_data:
