@@ -9,14 +9,19 @@ html {
 body {
   margin: 0;
   min-width: 320px;
+  line-height: 1.5;
   font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Plus Jakarta Sans", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   color: #f8fbff;
   background:
-    radial-gradient(circle at 80% 8%, rgba(125, 49, 255, 0.2), transparent 34%),
-    radial-gradient(circle at 18% 92%, rgba(45, 103, 255, 0.18), transparent 32%),
-    #050814;
+    radial-gradient(circle at 15% 8%, rgba(34, 211, 238, 0.12), transparent 28%),
+    radial-gradient(circle at 82% 10%, rgba(139, 92, 246, 0.18), transparent 32%),
+    radial-gradient(circle at 18% 92%, rgba(46, 103, 255, 0.14), transparent 34%),
+    linear-gradient(135deg, #050714 0%, #07111f 52%, #060817 100%);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-synthesis: none;
 }
 
 button,
@@ -28,21 +33,38 @@ button {
   border: 0;
 }
 
+button,
+input {
+  letter-spacing: 0;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(96, 165, 250, 0.5);
+  outline-offset: 3px;
+}
+
+::selection {
+  color: #ffffff;
+  background: rgba(99, 102, 241, 0.72);
+}
+
 .chat-shell {
-  width: min(100vw - 24px, 1500px);
-  min-height: calc(100vh - 24px);
-  margin: 12px auto;
+  width: 100vw;
+  min-height: 100vh;
+  margin: 0;
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: 304px minmax(0, 1fr);
   overflow: hidden;
-  border: 1px solid rgba(97, 119, 178, 0.34);
-  border-radius: 18px;
+  border: 0;
+  border-radius: 0;
   background:
-    linear-gradient(145deg, rgba(9, 15, 32, 0.96), rgba(3, 7, 18, 0.98)),
+    linear-gradient(145deg, rgba(9, 16, 31, 0.97), rgba(3, 8, 19, 0.985)),
     #050814;
   box-shadow:
-    0 24px 80px rgba(0, 0, 0, 0.48),
-    inset 0 0 80px rgba(52, 89, 180, 0.08);
+    0 26px 90px rgba(0, 0, 0, 0.52),
+    0 0 0 1px rgba(255, 255, 255, 0.025),
+    inset 0 0 90px rgba(52, 89, 180, 0.075);
   transition: grid-template-columns 180ms ease;
 }
 
@@ -62,13 +84,13 @@ button {
 }
 
 .sidebar {
-  min-height: calc(100vh - 10px);
-  padding: 28px 22px 22px;
+  min-height: 100vh;
+  padding: 26px 20px 20px;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(108, 124, 169, 0.26);
+  border-right: 1px solid rgba(124, 145, 194, 0.22);
   background:
-    linear-gradient(180deg, rgba(8, 13, 29, 0.96), rgba(5, 9, 22, 0.98)),
+    linear-gradient(180deg, rgba(10, 17, 34, 0.96), rgba(5, 10, 24, 0.985)),
     #070b17;
   transition: padding 180ms ease;
 }
@@ -87,10 +109,10 @@ button {
 
 .brand-row {
   display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) 36px;
+  grid-template-columns: 52px minmax(0, 1fr) 36px;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 42px;
+  gap: 14px;
+  margin-bottom: 34px;
 }
 
 .sidebar-collapsed .brand-row {
@@ -121,9 +143,9 @@ button {
 }
 
 .brand-mark {
-  width: 58px;
-  height: 58px;
-  border-radius: 18px;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
   position: relative;
   cursor: default;
 }
@@ -135,10 +157,10 @@ button {
 .brand-mark::before,
 .bot-avatar::before {
   content: "";
-  width: 28px;
-  height: 20px;
-  border: 4px solid currentColor;
-  border-radius: 9px;
+  width: 26px;
+  height: 18px;
+  border: 3px solid currentColor;
+  border-radius: 8px;
 }
 
 .brand-mark::after,
@@ -159,7 +181,7 @@ button {
 
 .brand-row h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 22px;
   line-height: 1.05;
   font-weight: 800;
   letter-spacing: 0;
@@ -185,18 +207,20 @@ button {
 }
 
 .icon-button {
-  width: 64px;
-  height: 64px;
+  width: 58px;
+  height: 58px;
   display: grid;
   place-items: center;
   cursor: pointer;
   color: #cbd3ed;
-  border: 1px solid rgba(101, 118, 162, 0.35);
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(18, 25, 45, 0.88), rgba(9, 14, 29, 0.9));
+  border: 1px solid rgba(111, 128, 176, 0.34);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(19, 28, 49, 0.9), rgba(10, 16, 31, 0.92));
   line-height: 1;
   transition:
     transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease,
     border-color 160ms ease,
     color 160ms ease;
 }
@@ -207,8 +231,12 @@ button {
   display: grid;
   place-items: center;
   line-height: 1;
-  font-size: 32px;
-  transform: translateY(-1px);
+  font-size: 30px;
+  transform: translate(1px, -2.5px);
+}
+
+.moon-symbol {
+  transform: translate(2px, 0.5px);
 }
 
 .trash-symbol {
@@ -229,6 +257,11 @@ button {
   transform: translateY(-1px);
 }
 
+.icon-button:hover {
+  border-color: rgba(148, 163, 255, 0.5);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
 .icon-button.compact {
   width: 36px;
   height: 36px;
@@ -237,6 +270,7 @@ button {
 
 .icon-button.compact .button-symbol {
   font-size: 24px;
+  transform: translate(0px, -1px);
 }
 
 .icon-button.danger {
@@ -246,17 +280,17 @@ button {
 
 .new-session-button {
   width: 100%;
-  min-height: 70px;
+  min-height: 62px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 10px;
   cursor: pointer;
   color: #fff;
-  border-radius: 10px;
-  background: linear-gradient(100deg, #425dff 0%, #8e19ef 100%);
-  box-shadow: 0 16px 34px rgba(91, 52, 255, 0.24);
-  font-size: 18px;
+  border-radius: 14px;
+  background: linear-gradient(100deg, #3b82f6 0%, #6d5dfc 52%, #9333ea 100%);
+  box-shadow: 0 16px 34px rgba(59, 130, 246, 0.18);
+  font-size: 15px;
   font-weight: 800;
   transition:
     transform 160ms ease,
@@ -274,10 +308,26 @@ button {
   display: none;
 }
 
-.new-session-button span {
-  font-size: 34px;
+.new-session-button > span:first-child {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 24px;
+  font-size: 25px;
   line-height: 1;
   font-weight: 300;
+  transform: translate(-8px, -2px);
+}
+
+.new-session-button .button-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 750;
+  transform: translate(-14px, 1px);
 }
 
 .new-session-button:disabled,
@@ -288,18 +338,18 @@ button {
 }
 
 .session-list {
-  margin-top: 36px;
+  margin-top: 28px;
   overflow-y: auto;
   flex: 1;
   width: 100%;
 }
 
 .session-list h2 {
-  margin: 0 0 18px 14px;
+  margin: 0 0 14px 12px;
   color: #aeb5c9;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -310,17 +360,17 @@ button {
 
 .session-item {
   width: 100%;
-  min-height: 76px;
+  min-height: 70px;
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr) 24px;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 8px;
-  padding: 14px 14px 14px 18px;
+  gap: 12px;
+  margin-bottom: 6px;
+  padding: 12px 12px 12px 14px;
   cursor: pointer;
   color: #f9fbff;
   text-align: left;
-  border-radius: 10px;
+  border-radius: 12px;
   background: transparent;
   transition:
     transform 160ms ease,
@@ -332,7 +382,8 @@ button {
 }
 
 .session-item.active {
-  background: rgba(32, 43, 72, 0.72);
+  background: linear-gradient(135deg, rgba(35, 48, 82, 0.78), rgba(20, 28, 51, 0.72));
+  box-shadow: inset 3px 0 0 rgba(96, 165, 250, 0.9);
 }
 
 .light-theme .session-item.active {
@@ -349,7 +400,7 @@ button {
   display: block;
   overflow: hidden;
   color: #fff;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   line-height: 1.25;
   text-overflow: ellipsis;
@@ -366,7 +417,7 @@ button {
   display: block;
   margin-top: 6px;
   color: #9ca6bd;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .light-theme .session-item small,
@@ -401,18 +452,18 @@ button {
 }
 
 .profile-card {
-  min-height: 84px;
+  min-height: 76px;
   margin-top: auto;
   padding: 18px;
   display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) 28px;
+  grid-template-columns: 48px minmax(0, 1fr) 24px;
   align-items: center;
   gap: 16px;
   cursor: pointer;
   text-align: left;
   border: 1px solid rgba(95, 113, 165, 0.28);
-  border-radius: 14px;
-  background: rgba(8, 14, 29, 0.72);
+  border-radius: 16px;
+  background: rgba(10, 17, 33, 0.72);
   transition: transform 160ms ease;
 }
 
@@ -422,14 +473,14 @@ button {
 }
 
 .profile-avatar {
-  width: 58px;
-  height: 58px;
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
   color: #fff;
   border-radius: 50%;
   background: linear-gradient(135deg, #4d66ff, #7b20f3);
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 800;
 }
 
@@ -440,7 +491,7 @@ button {
 
 .chat-main {
   min-width: 0;
-  padding: 38px 34px 24px;
+  padding: 34px 30px 22px;
   display: flex;
   flex-direction: column;
 }
@@ -449,14 +500,14 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 28px;
+  gap: 18px;
+  margin-bottom: 24px;
 }
 
 .session-heading h2 {
   margin: 0;
   color: #fff;
-  font-size: 28px;
+  font-size: 26px;
   line-height: 1.1;
   font-weight: 800;
 }
@@ -467,7 +518,7 @@ button {
   align-items: center;
   gap: 10px;
   color: #6ddd7a;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
 }
 
@@ -495,19 +546,20 @@ button {
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 16px;
 }
 
 .session-id-card {
-  min-width: 318px;
-  min-height: 84px;
-  padding: 18px 58px 16px 26px;
+  min-width: 300px;
+  min-height: 76px;
+  padding: 16px 54px 14px 22px;
   position: relative;
-  border: 1px solid rgba(120, 82, 239, 0.55);
+  border: 1px solid rgba(129, 140, 248, 0.42);
   border-radius: 16px;
   background:
-    linear-gradient(180deg, rgba(16, 21, 42, 0.92), rgba(8, 12, 28, 0.96)),
+    linear-gradient(180deg, rgba(18, 26, 47, 0.92), rgba(9, 15, 31, 0.96)),
     #0d1223;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 .light-theme .session-id-card {
@@ -520,7 +572,9 @@ button {
 .session-id-card span {
   display: block;
   color: #a9b0c6;
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
 }
 
 .light-theme .session-id-card span {
@@ -533,7 +587,7 @@ button {
   margin-top: 8px;
   overflow: hidden;
   color: #fff;
-  font-size: 17px;
+  font-size: 15px;
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -544,15 +598,29 @@ button {
 }
 
 .copy-button {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   position: absolute;
-  top: 26px;
-  right: 24px;
+  top: 22px;
+  right: 18px;
+  display: grid;
+  place-items: center;
   cursor: pointer;
   color: #cbd4f2;
-  background: transparent;
-  font-size: 25px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+  font-size: 22px;
+  line-height: 1;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.copy-button:hover {
+  color: #ffffff;
+  background: rgba(99, 102, 241, 0.18);
+  transform: translateY(-1px);
 }
 
 .light-theme .copy-button {
@@ -564,13 +632,15 @@ button {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 48px 30px 10px;
-  border: 1px solid rgba(100, 116, 165, 0.32);
+  padding: 34px 26px 10px;
+  border: 1px solid rgba(111, 130, 180, 0.3);
   border-radius: 18px;
   background:
-    linear-gradient(180deg, rgba(7, 13, 29, 0.72), rgba(4, 9, 21, 0.86)),
+    linear-gradient(180deg, rgba(9, 16, 33, 0.72), rgba(5, 11, 24, 0.88)),
     rgba(5, 10, 24, 0.88);
-  box-shadow: inset 0 0 120px rgba(24, 57, 126, 0.07);
+  box-shadow:
+    inset 0 0 120px rgba(24, 57, 126, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 .light-theme .conversation-panel {
@@ -585,14 +655,25 @@ button {
   min-height: 0;
   flex: 1;
   overflow-y: auto;
-  padding: 0 12px 24px;
+  padding: 0 8px 22px;
   scrollbar-color: rgba(95, 112, 164, 0.55) transparent;
+}
+
+.messages-container::-webkit-scrollbar,
+.session-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messages-container::-webkit-scrollbar-thumb,
+.session-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(112, 128, 176, 0.35);
 }
 
 .message {
   display: flex;
-  gap: 18px;
-  margin-bottom: 32px;
+  gap: 14px;
+  margin-bottom: 26px;
 }
 
 .bot-message {
@@ -605,17 +686,17 @@ button {
 }
 
 .bot-avatar {
-  width: 58px;
-  height: 58px;
-  flex: 0 0 58px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   position: relative;
   border-radius: 50%;
   margin-top: 0;
 }
 
 .bot-avatar::before {
-  width: 24px;
-  height: 18px;
+  width: 21px;
+  height: 15px;
   border-width: 3px;
 }
 
@@ -626,7 +707,7 @@ button {
 }
 
 .message-stack {
-  max-width: min(700px, 72%);
+  max-width: min(680px, 74%);
   display: flex;
   flex-direction: column;
 }
@@ -636,17 +717,17 @@ button {
 }
 
 .message-bubble {
-  padding: 16px 22px;
+  padding: 14px 18px;
   color: #fff;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.5;
   text-align: left;
-  border: 1px solid rgba(112, 127, 173, 0.3);
-  border-radius: 18px;
+  border: 1px solid rgba(122, 139, 184, 0.28);
+  border-radius: 16px;
   background:
-    linear-gradient(180deg, rgba(27, 35, 57, 0.88), rgba(17, 24, 42, 0.95)),
+    linear-gradient(180deg, rgba(29, 39, 65, 0.9), rgba(18, 26, 45, 0.96)),
     #151c31;
-  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.16);
 }
 
 .light-theme .message-bubble {
@@ -658,10 +739,10 @@ button {
 }
 
 .user-message .message-bubble {
-  border-color: rgba(94, 88, 255, 0.42);
-  border-radius: 18px;
-  background: linear-gradient(100deg, #4659ff 0%, #8b22ef 100%);
-  box-shadow: 0 18px 36px rgba(74, 73, 255, 0.24);
+  border-color: rgba(96, 165, 250, 0.36);
+  border-radius: 16px;
+  background: linear-gradient(100deg, #2563eb 0%, #5b5cf6 54%, #8b35d9 100%);
+  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.22);
 }
 
 .light-theme .user-message .message-bubble {
@@ -669,9 +750,9 @@ button {
 }
 
 .message-time {
-  margin-top: 12px;
+  margin-top: 8px;
   color: #9da7be;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .checkmark {
@@ -690,16 +771,16 @@ button {
 }
 
 .chat-form {
-  min-height: 82px;
+  min-height: 74px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 130px;
   align-items: center;
-  gap: 16px;
-  padding: 16px 16px 16px 24px;
-  border: 1px solid rgba(90, 105, 151, 0.36);
-  border-radius: 18px;
+  gap: 12px;
+  padding: 12px 12px 12px 20px;
+  border: 1px solid rgba(103, 121, 168, 0.34);
+  border-radius: 16px;
   background:
-    linear-gradient(180deg, rgba(17, 24, 42, 0.92), rgba(12, 18, 34, 0.96)),
+    linear-gradient(180deg, rgba(18, 26, 46, 0.94), rgba(11, 18, 33, 0.97)),
     #10182b;
   box-shadow:
     0 10px 42px rgba(0, 0, 0, 0.25),
@@ -720,7 +801,7 @@ button {
   border: 0;
   outline: 0;
   background: transparent;
-  font-size: 20px;
+  font-size: 17px;
 }
 
 .light-theme .chat-form input {
@@ -736,7 +817,7 @@ button {
 }
 
 .chat-form button {
-  min-height: 58px;
+  min-height: 50px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -744,8 +825,9 @@ button {
   cursor: pointer;
   color: #fff;
   border-radius: 12px;
-  background: linear-gradient(100deg, #435dff 0%, #8d20ee 100%);
-  font-size: 18px;
+  background: linear-gradient(100deg, #2563eb 0%, #635bff 58%, #8b35d9 100%);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.24);
+  font-size: 16px;
   font-weight: 800;
   transition:
     transform 160ms ease,
@@ -757,19 +839,19 @@ button {
 }
 
 .chat-form button span {
-  font-size: 25px;
+  font-size: 22px;
 }
 
 .disclaimer {
-  margin: 18px 0 0;
+  margin: 14px 0 0;
   color: #8e98b1;
   text-align: center;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 @media (max-width: 1180px) {
   .chat-shell {
-    grid-template-columns: 340px minmax(0, 1fr);
+    grid-template-columns: 292px minmax(0, 1fr);
   }
 
   .topbar {
@@ -803,12 +885,14 @@ button {
 
 .empty-chat strong {
   color: #ffffff;
-  font-size: 24px;
+  font-size: 22px;
+  line-height: 1.2;
 }
 
 .empty-chat p {
-  margin-top: 8px;
-  font-size: 16px;
+  max-width: 420px;
+  margin: 10px auto 0;
+  font-size: 15px;
 }
 
 @media (max-width: 860px) {
@@ -857,7 +941,7 @@ button {
   }
 
   .chat-main {
-    padding: 24px 14px 18px;
+    padding: 22px 14px 16px;
   }
 
   .topbar-actions {
@@ -872,7 +956,7 @@ button {
   }
 
   .conversation-panel {
-    padding: 28px 24px 10px;
+    padding: 24px 18px 10px;
   }
 
   .message {
@@ -896,7 +980,7 @@ button {
   }
 
   .chat-form {
-    min-height: 88px;
+    min-height: 74px;
     grid-template-columns: minmax(0, 1fr) 96px;
     gap: 8px;
     padding: 12px;
@@ -904,7 +988,7 @@ button {
 
   .chat-form input,
   .chat-form button {
-    font-size: 15px;
+    font-size: 14px;
   }
 }
 
