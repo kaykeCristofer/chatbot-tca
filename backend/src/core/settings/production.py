@@ -6,7 +6,24 @@ DEBUG = False
 ALLOWED_HOSTS = [
     os.environ.get("EC2_PUBLIC_IP", ""),     # IP da EC2
     os.environ.get("EC2_PUBLIC_DNS", ""),    # DNS público da EC2
+    os.environ.get("APP_DOMAIN", ""),        # domínio opcional
+    "localhost",
+    "127.0.0.1",
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    origin
+    for origin in [
+        os.environ.get("CSRF_TRUSTED_ORIGIN"),
+        f"http://{os.environ.get('EC2_PUBLIC_IP')}" if os.environ.get("EC2_PUBLIC_IP") else None,
+        f"http://{os.environ.get('EC2_PUBLIC_DNS')}" if os.environ.get("EC2_PUBLIC_DNS") else None,
+        f"https://{os.environ.get('APP_DOMAIN')}" if os.environ.get("APP_DOMAIN") else None,
+    ]
+    if origin
+]
+
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Postgres — todas as vars vêm do .env
 DATABASES = {

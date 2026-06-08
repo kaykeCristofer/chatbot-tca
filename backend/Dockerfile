@@ -37,12 +37,15 @@ CMD ["python", "-m", "uvicorn", "core.asgi:application", "--host", "0.0.0.0", "-
 FROM base AS production
 
 COPY ./src ./src
+COPY ./entrypoint.sh ./entrypoint.sh
 
 RUN adduser --disabled-password --gecos "" django_user && \
+    chmod +x /app/entrypoint.sh && \
     chown -R django_user:django_user /app
 
 USER django_user
 
 EXPOSE 8000
 
+ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["python", "-m", "uvicorn", "core.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
