@@ -1,16 +1,86 @@
-# React + Vite
+# Frontend - Chatbot TCA
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interface React + Vite para conversar com o backend do Chatbot TCA.
 
-Currently, two official plugins are available:
+## Tecnologias
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React
+- Vite
+- React Markdown
+- Fetch API
 
-## React Compiler
+## Requisitos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 20+
+- npm
+- Backend rodando em `http://localhost:8000`, quando `VITE_USE_MOCK=false`
 
-## Expanding the ESLint configuration
+## Configuracao
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Copie o arquivo de exemplo:
+
+```bash
+cp .env.example .env
+```
+
+Configuracao padrao para usar o backend local:
+
+```env
+VITE_USE_MOCK=false
+VITE_API_BASE_URL=/api
+```
+
+O Vite encaminha chamadas de `/api` para `http://localhost:8000`, conforme `vite.config.js`.
+
+Para testar somente a interface, sem backend:
+
+```env
+VITE_USE_MOCK=true
+VITE_API_BASE_URL=/api
+```
+
+Sempre reinicie o Vite depois de alterar `.env`.
+
+## Instalacao
+
+```bash
+npm install
+```
+
+## Rodando em desenvolvimento
+
+```bash
+npm run dev
+```
+
+Abra a URL exibida no terminal, normalmente:
+
+```text
+http://localhost:5173/
+```
+
+Se a porta estiver ocupada, o Vite usara outra porta, como `5174`.
+
+## Scripts
+
+```bash
+npm run dev
+npm run build
+npm run preview
+npm run lint
+```
+
+## Fluxo da aplicacao
+
+1. O frontend carrega sessoes existentes com `GET /api/sessions`.
+2. Ao enviar a primeira mensagem, chama `POST /api/chat` com `session_id: null`.
+3. O backend cria a sessao e retorna `session_id`.
+4. As proximas mensagens reutilizam o mesmo `session_id`.
+5. Ao selecionar uma sessao existente, o frontend carrega o historico com `GET /api/history/{session_id}`.
+6. Ao excluir uma sessao, chama `DELETE /api/sessions/{session_id}`.
+
+## Observacoes
+
+- Respostas do bot sao renderizadas como Markdown.
+- `Enter` envia a mensagem.
+- `Shift + Enter` quebra linha no campo de texto.

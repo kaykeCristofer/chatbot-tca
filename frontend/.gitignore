@@ -26,4 +26,3 @@ dist-ssr
 .env
 .env.local
 dist
-frontend/node_modules/
