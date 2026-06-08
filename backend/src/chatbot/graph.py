@@ -21,6 +21,28 @@ class ChatState(TypedDict):
     response: str         # resposta gerada pelo LLM
 
 
+def extract_text_content(content) -> str:
+    """
+    Alguns providers retornam texto direto; outros retornam blocos com metadata.
+    A API do frontend deve receber apenas o texto final.
+    """
+    if isinstance(content, str):
+        return content
+
+    if isinstance(content, list):
+        text_parts = []
+        for item in content:
+            if isinstance(item, str):
+                text_parts.append(item)
+            elif isinstance(item, dict) and isinstance(item.get("text"), str):
+                text_parts.append(item["text"])
+
+        if text_parts:
+            return "\n".join(text_parts)
+
+    return str(content)
+
+
 # ==========================================
 # NÓ 1: CARREGAR HISTÓRICO
 # ==========================================
@@ -64,7 +86,7 @@ async def node_call_llm(state: ChatState) -> ChatState:
 
     result = await llm.ainvoke(messages)
 
-    return {**state, "response": result.content}
+    return {**state, "response": extract_text_content(result.content)}
 
 
 # ==========================================

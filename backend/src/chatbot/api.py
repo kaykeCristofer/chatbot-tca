@@ -35,12 +35,19 @@ async def chat(request, body: ChatRequest):
     session = await get_or_create_session(body.session_id)
 
     # Passo 2 — dispara o grafo com o estado inicial
-    result = await chat_graph.ainvoke({
-        "session": session,
-        "user_input": body.message,
-        "history": [],
-        "response": "",
-    })
+    try:
+        result = await chat_graph.ainvoke({
+            "session": session,
+            "user_input": body.message,
+            "history": [],
+            "response": "",
+        })
+    except Exception as exc:
+        return api.create_response(
+            request,
+            {"detail": f"Erro ao consultar o provedor LLM: {exc}"},
+            status=502,
+        )
 
     # Passo 3 — devolve resposta + session_id para o cliente guardar
     return ChatResponse(

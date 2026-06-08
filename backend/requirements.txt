@@ -17,7 +17,7 @@ langgraph>=0.2
 # ==========================================
 langchain-anthropic>=0.3      # claude
 # langchain-openai>=0.2       # openai
-# langchain-google-genai>=2.0 # gemini
+langchain-google-genai>=2.0   # gemini
 
 # ==========================================
 # BANCO DE DADOS
