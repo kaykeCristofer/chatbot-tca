@@ -116,6 +116,30 @@ docker compose up --build
 DJANGO_SETTINGS_MODULE=core.settings.production docker compose --profile postgres up --build
 ```
 
+## Deploy com frontend na EC2
+
+Para producao com frontend + backend + PostgreSQL, use o compose da raiz do projeto:
+
+```bash
+docker compose --env-file ./backend/.env -f docker-compose.prod.yml up --build -d
+```
+
+Esse compose builda o frontend com Nginx na porta `80` e encaminha `/api` para o backend internamente.
+
+No host EC2, a porta publicada e controlada por `FRONTEND_HTTP_PORT` no `.env` do backend. Por padrao use:
+
+```env
+FRONTEND_HTTP_PORT=8080
+```
+
+Assim evita conflito se a porta `80` ja estiver ocupada.
+
+Se publicar em `8080`, use tambem:
+
+```env
+CSRF_TRUSTED_ORIGIN=http://SEU_IP_PUBLICO:8080
+```
+
 Se quiser executar as migracoes dentro do container:
 
 ```bash
