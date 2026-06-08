@@ -1,3 +1,5 @@
+import ReactMarkdown from "react-markdown";
+
 export default function MessageBubble({ role, content, time }) {
   const isUser = role === "user";
   const className = isUser ? "message user-message" : "message bot-message";
@@ -11,7 +13,13 @@ export default function MessageBubble({ role, content, time }) {
       )}
 
       <div className="message-stack">
-        <div className="message-bubble">{content}</div>
+        <div className="message-bubble">
+          {isUser ? (
+            content
+          ) : (
+            <ReactMarkdown>{content}</ReactMarkdown>
+          )}
+        </div>
         <div className="message-time">
           {time}
           {isUser && <span className="checkmark">✓✓</span>}
