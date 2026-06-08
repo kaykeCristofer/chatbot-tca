@@ -1,26 +1,39 @@
-import { useState } from "react";
-import { createSession, sendMessage } from "../api/chatbotApi";
+import { useEffect, useState } from "react";
+import {
+  deleteSession,
+  getSessionHistory,
+  listSessions,
+  sendMessage,
+} from "../api/chatbotApi";
 import MessageBubble from "./MessageBubble";
 import SessionInfo from "./SessionInfo";
 
-function getCurrentTime() {
+function formatMessageTime(dateValue = new Date()) {
   return new Intl.DateTimeFormat("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
-  }).format(new Date());
+  }).format(new Date(dateValue));
 }
 
-function getSessionDateTime() {
+function formatSessionLabel(dateValue = new Date()) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(dateValue));
+}
+
+function createDraftSession() {
   const now = new Date();
 
   return {
-    dateTime: now.toISOString(),
-    label: new Intl.DateTimeFormat("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(now),
+    id: `draft-${crypto.randomUUID()}`,
+    sessionId: null,
+    createdAt: now.toISOString(),
+    createdLabel: formatSessionLabel(now),
+    historyLoaded: true,
+    messages: [],
   };
 }
 
@@ -48,40 +61,115 @@ export default function ChatBox() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const activeSession = sessions.find((session) => session.id === activeSessionId);
-  const sessionId = activeSession?.id ?? null;
+  const sessionId = activeSession?.sessionId ?? null;
   const messages = activeSession?.messages ?? [];
 
-  async function createNewSession() {
-    const data = await createSession();
-    const createdAt = getSessionDateTime();
-    const newSession = {
-      id: data.session_id,
-      createdAt: createdAt.dateTime,
-      createdLabel: createdAt.label,
-      messages: [],
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadSessions() {
+      try {
+        setLoadingSession(true);
+        const data = await listSessions();
+
+        if (ignore) {
+          return;
+        }
+
+        const loadedSessions = data.map((session) => ({
+          id: session.session_id,
+          sessionId: session.session_id,
+          createdAt: session.created_at,
+          createdLabel: formatSessionLabel(session.created_at),
+          historyLoaded: false,
+          messages: [],
+          messageCount: session.message_count,
+        }));
+
+        setSessions(loadedSessions);
+        setActiveSessionId(loadedSessions[0]?.id ?? null);
+      } catch {
+        if (!ignore) {
+          setError("Não foi possível carregar as sessões do backend.");
+        }
+      } finally {
+        if (!ignore) {
+          setLoadingSession(false);
+        }
+      }
+    }
+
+    loadSessions();
+
+    return () => {
+      ignore = true;
     };
+  }, []);
+
+  useEffect(() => {
+    if (!activeSession || !activeSession.sessionId || activeSession.historyLoaded) {
+      return;
+    }
+
+    let ignore = false;
+
+    async function loadHistory() {
+      try {
+        setLoadingMessage(true);
+        const history = await getSessionHistory(activeSession.sessionId);
+
+        if (ignore) {
+          return;
+        }
+
+        const messagesFromHistory = history.map((message) => ({
+          role: message.role === "human" ? "user" : "bot",
+          content: message.content,
+          time: formatMessageTime(message.created_at),
+        }));
+
+        setSessions((previousSessions) =>
+          previousSessions.map((session) =>
+            session.id === activeSession.id
+              ? { ...session, historyLoaded: true, messages: messagesFromHistory }
+              : session,
+          ),
+        );
+      } catch {
+        if (!ignore) {
+          setError("Não foi possível carregar o histórico da sessão.");
+        }
+      } finally {
+        if (!ignore) {
+          setLoadingMessage(false);
+        }
+      }
+    }
+
+    loadHistory();
+
+    return () => {
+      ignore = true;
+    };
+  }, [activeSession]);
+
+  function createNewSession() {
+    const newSession = createDraftSession();
 
     setSessions((previousSessions) => [newSession, ...previousSessions]);
-    setActiveSessionId(data.session_id);
+    setActiveSessionId(newSession.id);
     setCopiedSessionId(false);
 
-    return data.session_id;
+    return newSession.id;
   }
 
-  async function handleCreateSession() {
+  function handleCreateSession() {
     if (sessions.length === 0) {
       return;
     }
 
-    try {
-      setError("");
-      setLoadingSession(true);
-      await createNewSession();
-    } catch {
-      setError("Não foi possível iniciar uma nova sessão.");
-    } finally {
-      setLoadingSession(false);
-    }
+    setError("");
+    createNewSession();
   }
 
   function handleSelectSession(selectedSessionId) {
@@ -91,18 +179,27 @@ export default function ChatBox() {
     setCopiedSessionId(false);
   }
 
-  function handleDeleteSession() {
+  async function handleDeleteSession() {
     if (!activeSessionId) {
       return;
     }
 
-    const remainingSessions = sessions.filter((session) => session.id !== activeSessionId);
+    try {
+      setError("");
 
-    setSessions(remainingSessions);
-    setActiveSessionId(remainingSessions[0]?.id ?? null);
-    setInputValue("");
-    setError("");
-    setCopiedSessionId(false);
+      if (sessionId) {
+        await deleteSession(sessionId);
+      }
+
+      const remainingSessions = sessions.filter((session) => session.id !== activeSessionId);
+
+      setSessions(remainingSessions);
+      setActiveSessionId(remainingSessions[0]?.id ?? null);
+      setInputValue("");
+      setCopiedSessionId(false);
+    } catch {
+      setError("Não foi possível excluir a sessão.");
+    }
   }
 
   async function handleCopySessionId() {
@@ -136,59 +233,73 @@ export default function ChatBox() {
       return;
     }
 
-    let targetSessionId = sessionId;
+    let targetSessionKey = activeSessionId;
+    let targetBackendSessionId = sessionId;
 
     const userMessage = {
       role: "user",
       content: trimmedMessage,
-      time: getCurrentTime(),
+      time: formatMessageTime(),
     };
 
     setInputValue("");
     setError("");
 
     try {
-      if (!targetSessionId) {
+      if (!targetSessionKey) {
         setLoadingSession(true);
-        targetSessionId = await createNewSession();
+        targetSessionKey = createNewSession();
       }
 
       setLoadingMessage(true);
 
       setSessions((previousSessions) =>
         previousSessions.map((session) =>
-          session.id === targetSessionId
+          session.id === targetSessionKey
             ? {
                 ...session,
+                historyLoaded: true,
                 messages: [...session.messages, userMessage],
               }
             : session,
         ),
       );
 
-      const data = await sendMessage(targetSessionId, trimmedMessage);
+      const data = await sendMessage(targetBackendSessionId, trimmedMessage);
+      targetBackendSessionId = data.session_id;
 
       const botMessage = {
         role: "bot",
-        content: data.answer,
-        time: getCurrentTime(),
+        content: data.response,
+        time: formatMessageTime(),
       };
 
       setSessions((previousSessions) =>
         previousSessions.map((session) =>
-          session.id === targetSessionId
+          session.id === targetSessionKey
             ? {
                 ...session,
+                id: targetBackendSessionId,
+                sessionId: targetBackendSessionId,
+                historyLoaded: true,
                 messages: [...session.messages, botMessage],
               }
             : session,
         ),
       );
-    } catch {
-      setError("Erro ao consultar o chatbot.");
+      setActiveSessionId(targetBackendSessionId);
+    } catch (requestError) {
+      setError(requestError.message || "Erro ao consultar o chatbot.");
     } finally {
       setLoadingSession(false);
       setLoadingMessage(false);
+    }
+  }
+
+  function handleMessageKeyDown(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      event.currentTarget.form?.requestSubmit();
     }
   }
 
@@ -239,7 +350,7 @@ export default function ChatBox() {
           }
         >
           <span>+</span>
-          <span className="button-label">{loadingSession ? "Criando..." : "Nova sessão"}</span>
+          <span className="button-label">{loadingSession ? "Carregando..." : "Nova sessão"}</span>
         </button>
 
         <section className="session-list" aria-label="Sessões recentes">
@@ -268,14 +379,6 @@ export default function ChatBox() {
           )}
         </section>
 
-        <button className="profile-card" type="button">
-          <span className="profile-avatar">?</span>
-          <span className="profile-copy">
-            <strong>Visitante</strong>
-            <small>Sem usuário vinculado</small>
-          </span>
-          <span className="profile-chevron">⌄</span>
-        </button>
       </aside>
 
       <main className="chat-main">
@@ -330,7 +433,7 @@ export default function ChatBox() {
                 <p>
                   {sessionId
                     ? "Envie sua primeira mensagem para começar."
-                    : "Digite uma mensagem para iniciar uma sessão."}
+                    : "Digite uma mensagem para registrar a sessão no backend."}
                 </p>
               </div>
             )}
@@ -348,7 +451,7 @@ export default function ChatBox() {
               <MessageBubble
                 role="bot"
                 content="Chatbot está digitando..."
-                time={getCurrentTime()}
+                time={formatMessageTime()}
               />
             )}
           </div>
@@ -356,12 +459,13 @@ export default function ChatBox() {
           {error && <div className="error-message">{error}</div>}
 
           <form className="chat-form" onSubmit={handleSendMessage}>
-            <input
-              type="text"
+            <textarea
               placeholder="Digite sua mensagem..."
               value={inputValue}
               onChange={(event) => setInputValue(event.target.value)}
+              onKeyDown={handleMessageKeyDown}
               disabled={loadingSession || loadingMessage}
+              rows={1}
             />
 
             <button type="submit" disabled={loadingSession || loadingMessage}>

@@ -1,20 +1,20 @@
-const USE_MOCK = import.meta.env.VITE_USE_MOCK !== "false";
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
-export async function createSession() {
-  if (USE_MOCK) {
-    return {
-      session_id: crypto.randomUUID(),
-    };
-  }
-
-  const response = await fetch(`${API_BASE_URL}/session`, {
-    method: "POST",
-  });
-
+async function parseResponse(response, fallbackMessage) {
   if (!response.ok) {
-    throw new Error("Erro ao criar sessão");
+    let errorMessage = `${fallbackMessage} (${response.status})`;
+
+    try {
+      const data = await response.clone().json();
+      errorMessage = data.detail || data.message || errorMessage;
+    } catch {
+      const text = await response.text();
+      errorMessage = text ? `${errorMessage}: ${text.slice(0, 160)}` : errorMessage;
+    }
+
+    throw new Error(errorMessage);
   }
 
   return response.json();
@@ -25,7 +25,8 @@ export async function sendMessage(sessionId, message) {
     await new Promise((resolve) => setTimeout(resolve, 800));
 
     return {
-      answer: `Resposta simulada para: "${message}"`,
+      session_id: sessionId || crypto.randomUUID(),
+      response: `Resposta simulada para: "${message}"`,
     };
   }
 
@@ -40,9 +41,37 @@ export async function sendMessage(sessionId, message) {
     }),
   });
 
-  if (!response.ok) {
-    throw new Error("Erro ao enviar mensagem");
+  return parseResponse(response, "Erro ao enviar mensagem");
+}
+
+export async function listSessions() {
+  if (USE_MOCK) {
+    return [];
   }
 
-  return response.json();
+  const response = await fetch(`${API_BASE_URL}/sessions`);
+
+  return parseResponse(response, "Erro ao listar sessões");
+}
+
+export async function getSessionHistory(sessionId) {
+  if (USE_MOCK) {
+    return [];
+  }
+
+  const response = await fetch(`${API_BASE_URL}/history/${sessionId}`);
+
+  return parseResponse(response, "Erro ao carregar histórico");
+}
+
+export async function deleteSession(sessionId) {
+  if (USE_MOCK) {
+    return { detail: "Sessão removida com sucesso." };
+  }
+
+  const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}`, {
+    method: "DELETE",
+  });
+
+  return parseResponse(response, "Erro ao excluir sessão");
 }
