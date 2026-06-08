@@ -1,0 +1,35 @@
+# ==========================================
+# DJANGO + NINJA
+# ==========================================
+django>=5.0
+django-ninja>=1.0
+
+# ==========================================
+# LLM — LangChain core obrigatório
+# ==========================================
+langchain>=0.3
+langchain-core>=0.3
+langgraph>=0.2
+
+# ==========================================
+# PROVIDERS — instale só o que for usar
+# descomente conforme o LLM_PROVIDER do .env
+# ==========================================
+langchain-anthropic>=0.3      # claude
+# langchain-openai>=0.2       # openai
+langchain-google-genai>=2.0   # gemini
+
+# ==========================================
+# BANCO DE DADOS
+# ==========================================
+psycopg2-binary>=2.9          # postgres (EC2)
+
+# ==========================================
+# SERVIDOR ASGI
+# ==========================================
+uvicorn[standard]>=0.30
+
+# ==========================================
+# UTILITÁRIOS
+# ==========================================
+python-dotenv>=1.0            # lê o .env
