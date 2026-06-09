@@ -24,11 +24,19 @@ function formatSessionLabel(dateValue = new Date()) {
   }).format(new Date(dateValue));
 }
 
+function createClientId(prefix = "client") {
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID();
+  }
+
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
 function createDraftSession() {
   const now = new Date();
 
   return {
-    id: `draft-${crypto.randomUUID()}`,
+    id: createClientId("draft"),
     sessionId: null,
     createdAt: now.toISOString(),
     createdLabel: formatSessionLabel(now),
