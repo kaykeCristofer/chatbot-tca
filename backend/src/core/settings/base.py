@@ -9,8 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DATA_DIR =  BASE_DIR / "../data"
 os.makedirs(DATA_DIR, exist_ok=True)
 
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
-# Sobrescrito em development.py e production.py
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-local-test-secret")
+# Sobrescrito em production.py para exigir uma chave real em produção
 
 DEBUG = False
 ALLOWED_HOSTS = []

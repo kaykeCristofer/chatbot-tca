@@ -257,6 +257,36 @@ Depois reinicie o Vite:
 npm run dev
 ```
 
+## Testes automatizados
+
+O projeto possui testes automatizados para backend e frontend.
+
+Backend:
+
+```bash
+cd backend
+venv\Scripts\python src\manage.py test chatbot
+```
+
+Essa suite cobre sessoes, historico, API, banco de dados, grafo LangGraph, fabrica de LLM e testes smoke de performance com LLM mockado.
+
+Frontend:
+
+```bash
+cd frontend
+npm run test
+```
+
+Essa suite usa Vitest e Testing Library para validar o cliente da API, modo mock, tratamento de erros e componentes principais do chat.
+
+Os testes reais com Gemini ficam desativados por padrao para evitar consumo da chave de API. Para executa-los explicitamente:
+
+```powershell
+cd backend
+$env:RUN_GEMINI_INTEGRATION_TESTS="true"
+venv\Scripts\python src\manage.py test chatbot.test_gemini_integration
+```
+
 ## Rotas principais da API
 
 - `GET /api/health`: verifica se o backend esta no ar.
@@ -278,6 +308,7 @@ npm run dev
 Frontend:
 
 ```bash
+npm run test
 npm run lint
 npm run build
 ```
@@ -285,6 +316,7 @@ npm run build
 Backend:
 
 ```bash
+python3 src/manage.py test chatbot
 python3 src/manage.py check
 python3 src/manage.py migrate
 ```

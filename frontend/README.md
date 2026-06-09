@@ -65,9 +65,35 @@ Se a porta estiver ocupada, o Vite usara outra porta, como `5174`.
 
 ```bash
 npm run dev
+npm run test
 npm run build
 npm run preview
 npm run lint
+```
+
+## Testes
+
+Para rodar os testes automatizados do frontend:
+
+```bash
+npm run test
+```
+
+A suite usa Vitest e Testing Library para validar:
+
+- cliente da API em `src/api/chatbotApi.js`;
+- modo mock sem backend;
+- tratamento de erros da API;
+- fluxo principal do `ChatBox`;
+- carregamento de historico;
+- exclusao de sessao;
+- componentes `MessageBubble` e `SessionInfo`.
+
+Tambem e recomendado validar lint e build:
+
+```bash
+npm run lint
+npm run build
 ```
 
 ## Fluxo da aplicacao

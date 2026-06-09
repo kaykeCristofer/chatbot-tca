@@ -163,6 +163,33 @@ docker build -t backend-chatbot --target production .
 
 O admin do Django fica em `/admin/`.
 
+## Testes
+
+Para rodar os testes automatizados do backend:
+
+```powershell
+venv\Scripts\python src\manage.py test chatbot
+```
+
+A suite cobre:
+
+- gerenciamento de sessoes;
+- persistencia e recuperacao de historico;
+- endpoints da API;
+- integracao com banco de dados de teste;
+- grafo LangGraph com LLM mockado;
+- fabrica de LLM;
+- testes smoke de performance com LLM mockado.
+
+Os testes reais com Gemini ficam desativados por padrao para evitar consumo da chave de API. Para executa-los explicitamente:
+
+```powershell
+$env:RUN_GEMINI_INTEGRATION_TESTS="true"
+venv\Scripts\python src\manage.py test chatbot.test_gemini_integration
+```
+
+Esses testes fazem uma chamada real ao Gemini e podem demorar mais que a suite normal.
+
 ## Rotina comum de desenvolvimento
 
 - As alteracoes em `src/` entram no container via volume.

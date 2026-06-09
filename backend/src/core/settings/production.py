@@ -1,7 +1,12 @@
 from .base import *
 import os
+from django.core.exceptions import ImproperlyConfigured
 
 DEBUG = False
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+
+if not SECRET_KEY:
+    raise ImproperlyConfigured("DJANGO_SECRET_KEY deve ser definida em produção.")
 
 ALLOWED_HOSTS = [
     os.environ.get("EC2_PUBLIC_IP", ""),     # IP da EC2
