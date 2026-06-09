@@ -2,6 +2,14 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
+function createClientId(prefix = "client") {
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID();
+  }
+
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
 async function parseResponse(response, fallbackMessage) {
   if (!response.ok) {
     let errorMessage = `${fallbackMessage} (${response.status})`;
@@ -25,7 +33,7 @@ export async function sendMessage(sessionId, message) {
     await new Promise((resolve) => setTimeout(resolve, 800));
 
     return {
-      session_id: sessionId || crypto.randomUUID(),
+      session_id: sessionId || createClientId("mock-session"),
       response: `Resposta simulada para: "${message}"`,
     };
   }
