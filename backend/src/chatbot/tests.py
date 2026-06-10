@@ -118,14 +118,23 @@ class LLMFactoryTests(TestCase):
         with self.assertRaisesMessage(ValueError, "LLM_PROVIDER 'invalid' inválido"):
             get_llm()
 
-    @override_settings(LLM_PROVIDER="gemini", LLM_MODEL="models/test", LLM_API_KEY="secret")
+    @override_settings(
+        LLM_PROVIDER="gemini",
+        LLM_MODEL="models/test",
+        LLM_API_KEY="secret",
+        LLM_TIMEOUT_SECONDS=120,
+    )
     def test_get_llm_builds_gemini_provider(self):
         provider = Mock(return_value="gemini-client")
 
         with patch.dict("sys.modules", {"langchain_google_genai": SimpleNamespace(ChatGoogleGenerativeAI=provider)}):
             self.assertEqual(get_llm(), "gemini-client")
 
-        provider.assert_called_once_with(model="models/test", google_api_key="secret")
+        provider.assert_called_once_with(
+            model="models/test",
+            google_api_key="secret",
+            timeout=120,
+        )
 
 
 @override_settings(SECRET_KEY="test-secret")

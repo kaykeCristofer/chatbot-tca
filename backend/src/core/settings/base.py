@@ -115,6 +115,7 @@ STATIC_URL = 'static/'
 LLM_PROVIDER = os.environ.get("LLM_PROVIDER", "claude")
 LLM_MODEL = os.environ.get("LLM_MODEL", "claude-haiku-4-5-20251001")
 LLM_API_KEY = os.environ.get("LLM_API_KEY")
+LLM_TIMEOUT_SECONDS = int(os.environ.get("LLM_TIMEOUT_SECONDS", "120"))
 
 
 # ==========================================
