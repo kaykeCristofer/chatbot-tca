@@ -15,6 +15,7 @@ def get_llm():
     provider = settings.LLM_PROVIDER
     model = settings.LLM_MODEL
     api_key = settings.LLM_API_KEY
+    timeout = settings.LLM_TIMEOUT_SECONDS
 
     if not api_key:
         raise ValueError("LLM_API_KEY não definida no .env")
@@ -24,6 +25,7 @@ def get_llm():
         return ChatAnthropic(
             model=model,
             api_key=api_key,
+            timeout=timeout,
         )
 
     elif provider == "openai":
@@ -31,6 +33,7 @@ def get_llm():
         return ChatOpenAI(
             model=model,
             api_key=api_key,
+            timeout=timeout,
         )
 
     elif provider == "gemini":
@@ -38,6 +41,7 @@ def get_llm():
         return ChatGoogleGenerativeAI(
             model=model,
             google_api_key=api_key,
+            timeout=timeout,
         )
 
     else:
