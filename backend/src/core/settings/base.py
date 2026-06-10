@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 3 apps
     'ninja',
+    'ninja_jwt',
     #myapps
     'chatbot',
 ]
@@ -114,3 +115,19 @@ STATIC_URL = 'static/'
 LLM_PROVIDER = os.environ.get("LLM_PROVIDER", "claude")
 LLM_MODEL = os.environ.get("LLM_MODEL", "claude-haiku-4-5-20251001")
 LLM_API_KEY = os.environ.get("LLM_API_KEY")
+
+
+# ==========================================
+# JWT CONFIGURATION
+# ==========================================
+from datetime import timedelta
+
+NINJA_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+}

@@ -1,9 +1,16 @@
-# src/chatbot/api.py
 from uuid import UUID
 from ninja import NinjaAPI
 from ninja.errors import HttpError
+from ninja_jwt.authentication import JWTAuth
+# === ADICIONADO: Importar os routers de autenticação do ninja_jwt ===
+from ninja_jwt.routers.obtain import obtain_pair_router
+
+from django.contrib.auth.models import User
 from .schemas import ChatRequest, ChatResponse, MessageOut, SessionOut
-from .session_manager import get_or_create_session
+from .session_manager import (
+    get_or_create_session,
+    validate_session_ownership,
+)
 from .models import Session, Message
 from .graph import chat_graph
 
@@ -14,25 +21,27 @@ api = NinjaAPI(
     description="API de chatbot com sessões isoladas por usuário.",
 )
 
+# === ADICIONADO: Registrar as rotas de Token JWT diretamente na API ===
+# Isso criará os endpoints: /api/token/pair, /api/token/refresh e /api/token/verify
+api.add_router("/token/", obtain_pair_router)
+
+
+# Instância de autenticação JWT para os endpoints protegidos
+auth = JWTAuth()
+
 
 # ==========================================
 # ENDPOINT 1: ENVIAR MENSAGEM
 # ==========================================
-@api.post("/chat", response=ChatResponse)
+@api.post("/chat", response=ChatResponse, auth=auth)
 async def chat(request, body: ChatRequest):
     """
-    Endpoint principal.
-
-    Fluxo:
-        1. Cria ou recupera a sessão do usuário
-        2. Dispara o grafo LangGraph
-        3. Devolve a resposta e o session_id
-
-    Na primeira mensagem o cliente envia session_id=null.
-    Nas seguintes, reutiliza o session_id recebido.
+    Endpoint principal protegido por JWT.
     """
-    # Passo 1 — garante que existe uma sessão válida
-    session = await get_or_create_session(body.session_id)
+    user: User = request.auth  # Recebe o usuário autenticado via JWT
+    
+    # Passo 1 — garante que existe uma sessão válida para este usuário
+    session = await get_or_create_session(user, body.session_id)
 
     # Passo 2 — dispara o grafo com o estado inicial
     try:
@@ -57,16 +66,18 @@ async def chat(request, body: ChatRequest):
 
 
 # ==========================================
-# ENDPOINT 2: LISTAR SESSÕES ATIVAS
+# ENDPOINT 2: LISTAR SESSÕES DO USUÁRIO
 # ==========================================
-@api.get("/sessions", response=list[SessionOut])
+@api.get("/sessions", response=list[SessionOut], auth=auth)
 async def list_sessions(request):
     """
-    Lista todas as sessões registradas no banco.
-    Útil para debug e demonstração na apresentação.
+    Lista apenas as sessões do usuário autenticado.
+    Garante isolamento entre usuários.
     """
+    user: User = request.auth
+    
     sessions = []
-    async for session in Session.objects.all():
+    async for session in Session.objects.filter(user=user):
         count = await Message.objects.filter(session=session).acount()
         sessions.append(SessionOut(
             session_id=session.id,
@@ -80,16 +91,16 @@ async def list_sessions(request):
 # ==========================================
 # ENDPOINT 3: HISTÓRICO DE UMA SESSÃO
 # ==========================================
-@api.get("/history/{session_id}", response=list[MessageOut])
+@api.get("/history/{session_id}", response=list[MessageOut], auth=auth)
 async def get_history(request, session_id: UUID):
     """
     Retorna o histórico completo de mensagens de uma sessão.
-    Útil para o frontend renderizar a conversa ao reconectar.
+    Valida que a sessão pertence ao usuário autenticado.
     """
-    try:
-        session = await Session.objects.aget(id=session_id)
-    except Session.DoesNotExist:
-        raise HttpError(404, "Sessão não encontrada.")
+    user: User = request.auth
+    
+    # Valida ownership antes de retornar histórico
+    session = await validate_session_ownership(user, session_id)
 
     messages = []
     async for msg in Message.objects.filter(session=session):
@@ -104,28 +115,28 @@ async def get_history(request, session_id: UUID):
 # ==========================================
 # ENDPOINT 4: DELETAR SESSÃO
 # ==========================================
-@api.delete("/sessions/{session_id}")
+@api.delete("/sessions/{session_id}", auth=auth)
 async def delete_session(request, session_id: UUID):
     """
     Remove uma sessão e todo seu histórico do banco.
-    Cascade no model garante que as mensagens são apagadas junto.
+    Valida que a sessão pertence ao usuário autenticado.
     """
-    try:
-        session = await Session.objects.aget(id=session_id)
-    except Session.DoesNotExist:
-        raise HttpError(404, "Sessão não encontrada.")
-
+    user: User = request.auth
+    
+    # Valida ownership antes de deletar
+    session = await validate_session_ownership(user, session_id)
+    
     await session.adelete()
     return {"detail": "Sessão removida com sucesso."}
 
 
 # ==========================================
-# ENDPOINT 5: HEALTH CHECK
+# ENDPOINT 5: HEALTH CHECK (sem autenticação)
 # ==========================================
 @api.get("/health")
 def health(request):
     """
     Verifica se a aplicação está no ar.
-    Usado pelo Docker e monitoramento na EC2.
+    NÃO requer autenticação.
     """
     return {"status": "ok"}

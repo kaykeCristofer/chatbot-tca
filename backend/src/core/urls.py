@@ -1,7 +1,12 @@
 from django.contrib import admin
 from django.urls import path
 from chatbot.api import api
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
+    # ==========================================
+    # CHATBOT API (Inclui rotas de Auth e Endpoints)
+    # ==========================================
     path("api/", api.urls)
 ]
