@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import {
+  clearStoredAuth,
   deleteSession,
   getSessionHistory,
+  getStoredAuth,
   listSessions,
+  login,
   sendMessage,
 } from "../api/chatbotApi";
 import MessageBubble from "./MessageBubble";
@@ -64,6 +67,10 @@ export default function ChatBox() {
   const [loadingSession, setLoadingSession] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(false);
   const [error, setError] = useState("");
+  const [authSession, setAuthSession] = useState(() => getStoredAuth());
+  const [loginForm, setLoginForm] = useState({ username: "", password: "" });
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
   const [copiedSessionId, setCopiedSessionId] = useState(false);
   const [theme, setTheme] = useState("dark");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -73,6 +80,10 @@ export default function ChatBox() {
   const messages = activeSession?.messages ?? [];
 
   useEffect(() => {
+    if (!authSession?.access) {
+      return;
+    }
+
     let ignore = false;
 
     async function loadSessions() {
@@ -112,7 +123,7 @@ export default function ChatBox() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [authSession]);
 
   useEffect(() => {
     if (!activeSession || !activeSession.sessionId || activeSession.historyLoaded) {
@@ -232,6 +243,35 @@ export default function ChatBox() {
     setIsSidebarCollapsed((currentValue) => !currentValue);
   }
 
+  async function handleLogin(event) {
+    event.preventDefault();
+
+    try {
+      setLoginLoading(true);
+      setLoginError("");
+      const data = await login(loginForm.username.trim(), loginForm.password);
+      setAuthSession(data);
+      setLoginForm({ username: "", password: "" });
+      setSessions([]);
+      setActiveSessionId(null);
+      setError("");
+    } catch (requestError) {
+      setLoginError(requestError.message || "Não foi possível fazer login.");
+    } finally {
+      setLoginLoading(false);
+    }
+  }
+
+  function handleLogout() {
+    clearStoredAuth();
+    setAuthSession(null);
+    setSessions([]);
+    setActiveSessionId(null);
+    setInputValue("");
+    setError("");
+    setCopiedSessionId(false);
+  }
+
   async function handleSendMessage(event) {
     event.preventDefault();
 
@@ -309,6 +349,64 @@ export default function ChatBox() {
       event.preventDefault();
       event.currentTarget.form?.requestSubmit();
     }
+  }
+
+  if (!authSession?.access) {
+    return (
+      <main className="auth-page">
+        <form className="auth-panel" onSubmit={handleLogin}>
+          <div className="auth-brand">
+            <span className="brand-mark auth-mark">
+              <span>::</span>
+            </span>
+            <div>
+              <h1>Chatbot TCA</h1>
+              <p>Acesse para carregar suas sessões.</p>
+            </div>
+          </div>
+
+          <label>
+            Usuário
+            <input
+              type="text"
+              value={loginForm.username}
+              onChange={(event) =>
+                setLoginForm((currentForm) => ({
+                  ...currentForm,
+                  username: event.target.value,
+                }))
+              }
+              autoComplete="username"
+              disabled={loginLoading}
+              required
+            />
+          </label>
+
+          <label>
+            Senha
+            <input
+              type="password"
+              value={loginForm.password}
+              onChange={(event) =>
+                setLoginForm((currentForm) => ({
+                  ...currentForm,
+                  password: event.target.value,
+                }))
+              }
+              autoComplete="current-password"
+              disabled={loginLoading}
+              required
+            />
+          </label>
+
+          {loginError && <div className="error-message">{loginError}</div>}
+
+          <button className="auth-submit" type="submit" disabled={loginLoading}>
+            {loginLoading ? "Entrando..." : "Entrar"}
+          </button>
+        </form>
+      </main>
+    );
   }
 
   return (
@@ -429,6 +527,14 @@ export default function ChatBox() {
               title="Excluir sessão atual"
             >
               <span className="button-symbol trash-symbol">🗑</span>
+            </button>
+            <button
+              className="logout-button"
+              type="button"
+              onClick={handleLogout}
+              title={`Sair de ${authSession.username}`}
+            >
+              Sair
             </button>
           </div>
         </header>

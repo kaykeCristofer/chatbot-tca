@@ -76,6 +76,93 @@ textarea:focus-visible {
   transition: grid-template-columns 180ms ease;
 }
 
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.auth-panel {
+  width: min(440px, 100%);
+  display: grid;
+  gap: 18px;
+  padding: 28px;
+  border: 1px solid rgba(124, 145, 194, 0.28);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(11, 18, 35, 0.96), rgba(6, 11, 25, 0.98)),
+    #080d1d;
+  box-shadow: 0 26px 80px rgba(0, 0, 0, 0.38);
+}
+
+.auth-brand {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.auth-mark {
+  position: relative;
+}
+
+.auth-brand h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.auth-brand p {
+  margin: 8px 0 0;
+  color: #a8afc3;
+}
+
+.auth-panel label {
+  display: grid;
+  gap: 8px;
+  color: #d8def0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.auth-panel input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  color: #f7f9ff;
+  border: 1px solid rgba(103, 121, 168, 0.4);
+  border-radius: 12px;
+  background: rgba(7, 12, 27, 0.9);
+  outline: 0;
+}
+
+.auth-submit,
+.logout-button {
+  cursor: pointer;
+  color: #ffffff;
+  border-radius: 12px;
+  background: linear-gradient(100deg, #2563eb 0%, #635bff 58%, #8b35d9 100%);
+  font-weight: 800;
+}
+
+.auth-submit {
+  min-height: 52px;
+  margin-top: 4px;
+}
+
+.logout-button {
+  min-height: 58px;
+  padding: 0 18px;
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.2);
+}
+
+.auth-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
 .chat-shell.sidebar-collapsed {
   grid-template-columns: 92px minmax(0, 1fr);
 }
@@ -256,6 +343,28 @@ textarea:focus-visible {
   color: #344054;
   border-color: rgba(113, 133, 184, 0.28);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(233, 238, 249, 0.94));
+}
+
+.light-theme .auth-panel {
+  border-color: rgba(120, 139, 184, 0.3);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(235, 241, 252, 0.98)),
+    #ffffff;
+}
+
+.light-theme .auth-brand h1,
+.light-theme .auth-panel label {
+  color: #101828;
+}
+
+.light-theme .auth-brand p {
+  color: #667085;
+}
+
+.light-theme .auth-panel input {
+  color: #101828;
+  border-color: rgba(112, 131, 180, 0.36);
+  background: rgba(255, 255, 255, 0.86);
 }
 
 .icon-button:hover,

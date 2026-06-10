@@ -156,12 +156,19 @@ docker build -t backend-chatbot --target production .
 ## Rotas principais
 
 - `GET /api/health` - verifica se a aplicacao esta no ar
+- `POST /api/token/pair` - autentica usuario e retorna tokens JWT
 - `POST /api/chat` - envia uma mensagem para o chatbot
-- `GET /api/sessions` - lista sessoes ativas
-- `GET /api/history/{session_id}` - retorna o historico de uma sessao
-- `DELETE /api/sessions/{session_id}` - remove uma sessao
+- `GET /api/sessions` - lista sessoes do usuario autenticado
+- `GET /api/history/{session_id}` - retorna o historico de uma sessao do usuario autenticado
+- `DELETE /api/sessions/{session_id}` - remove uma sessao do usuario autenticado
 
 O admin do Django fica em `/admin/`.
+
+As rotas do chatbot exigem:
+
+```http
+Authorization: Bearer <access_token>
+```
 
 ## Testes
 

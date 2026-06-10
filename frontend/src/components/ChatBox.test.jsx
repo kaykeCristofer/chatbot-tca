@@ -3,9 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import {
+  clearStoredAuth,
   deleteSession,
   getSessionHistory,
+  getStoredAuth,
   listSessions,
+  login,
   sendMessage,
 } from "../api/chatbotApi";
 import ChatBox from "./ChatBox";
@@ -13,19 +16,34 @@ import MessageBubble from "./MessageBubble";
 import SessionInfo from "./SessionInfo";
 
 vi.mock("../api/chatbotApi", () => ({
+  clearStoredAuth: vi.fn(),
   deleteSession: vi.fn(),
   getSessionHistory: vi.fn(),
+  getStoredAuth: vi.fn(),
   listSessions: vi.fn(),
+  login: vi.fn(),
   sendMessage: vi.fn(),
 }));
 
 describe("ChatBox", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    getStoredAuth.mockReturnValue({ username: "kayke", access: "access-token" });
+    login.mockResolvedValue({ username: "kayke", access: "access-token" });
     listSessions.mockResolvedValue([]);
     getSessionHistory.mockResolvedValue([]);
     sendMessage.mockResolvedValue({ session_id: "session-1", response: "Resposta do bot" });
     deleteSession.mockResolvedValue({ detail: "Sessao removida com sucesso." });
+  });
+
+  test("renders login form when there is no stored auth", () => {
+    getStoredAuth.mockReturnValue(null);
+
+    render(<ChatBox />);
+
+    expect(screen.getByText("Acesse para carregar suas sessões.")).toBeTruthy();
+    expect(screen.getByLabelText("Usuário")).toBeTruthy();
+    expect(screen.getByLabelText("Senha")).toBeTruthy();
   });
 
   test("renders the empty state when there are no backend sessions", async () => {
@@ -107,6 +125,17 @@ describe("ChatBox", () => {
 
     await waitFor(() => expect(deleteSession).toHaveBeenCalledWith("session-1"));
     expect(screen.getByText("Nenhuma sessão iniciada.")).toBeTruthy();
+  });
+
+  test("clears auth and chat state on logout", async () => {
+    const user = userEvent.setup();
+    render(<ChatBox />);
+
+    await waitFor(() => expect(listSessions).toHaveBeenCalledTimes(1));
+    await user.click(screen.getByRole("button", { name: "Sair" }));
+
+    expect(clearStoredAuth).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("Acesse para carregar suas sessões.")).toBeTruthy();
   });
 });
 
