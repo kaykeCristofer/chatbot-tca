@@ -65,22 +65,51 @@ Se a porta estiver ocupada, o Vite usara outra porta, como `5174`.
 
 ```bash
 npm run dev
+npm run test
 npm run build
 npm run preview
 npm run lint
 ```
 
+## Testes
+
+Para rodar os testes automatizados do frontend:
+
+```bash
+npm run test
+```
+
+A suite usa Vitest e Testing Library para validar:
+
+- cliente da API em `src/api/chatbotApi.js`;
+- modo mock sem backend;
+- tratamento de erros da API;
+- fluxo principal do `ChatBox`;
+- carregamento de historico;
+- exclusao de sessao;
+- componentes `MessageBubble` e `SessionInfo`.
+
+Tambem e recomendado validar lint e build:
+
+```bash
+npm run lint
+npm run build
+```
+
 ## Fluxo da aplicacao
 
-1. O frontend carrega sessoes existentes com `GET /api/sessions`.
-2. Ao enviar a primeira mensagem, chama `POST /api/chat` com `session_id: null`.
-3. O backend cria a sessao e retorna `session_id`.
-4. As proximas mensagens reutilizam o mesmo `session_id`.
-5. Ao selecionar uma sessao existente, o frontend carrega o historico com `GET /api/history/{session_id}`.
-6. Ao excluir uma sessao, chama `DELETE /api/sessions/{session_id}`.
+1. O usuario faz login com usuario e senha do Django.
+2. O frontend chama `POST /api/token/pair` e salva os tokens JWT no `localStorage`.
+3. O frontend carrega sessoes do usuario autenticado com `GET /api/sessions`.
+4. Ao enviar a primeira mensagem, chama `POST /api/chat` com `session_id: null`.
+5. O backend cria a sessao e retorna `session_id`.
+6. As proximas mensagens reutilizam o mesmo `session_id`.
+7. Ao selecionar uma sessao existente, o frontend carrega o historico com `GET /api/history/{session_id}`.
+8. Ao excluir uma sessao, chama `DELETE /api/sessions/{session_id}`.
 
 ## Observacoes
 
 - Respostas do bot sao renderizadas como Markdown.
+- O historico e separado por usuario autenticado.
 - `Enter` envia a mensagem.
 - `Shift + Enter` quebra linha no campo de texto.

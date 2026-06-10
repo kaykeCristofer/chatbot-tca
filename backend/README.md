@@ -156,12 +156,46 @@ docker build -t backend-chatbot --target production .
 ## Rotas principais
 
 - `GET /api/health` - verifica se a aplicacao esta no ar
+- `POST /api/token/pair` - autentica usuario e retorna tokens JWT
 - `POST /api/chat` - envia uma mensagem para o chatbot
-- `GET /api/sessions` - lista sessoes ativas
-- `GET /api/history/{session_id}` - retorna o historico de uma sessao
-- `DELETE /api/sessions/{session_id}` - remove uma sessao
+- `GET /api/sessions` - lista sessoes do usuario autenticado
+- `GET /api/history/{session_id}` - retorna o historico de uma sessao do usuario autenticado
+- `DELETE /api/sessions/{session_id}` - remove uma sessao do usuario autenticado
 
 O admin do Django fica em `/admin/`.
+
+As rotas do chatbot exigem:
+
+```http
+Authorization: Bearer <access_token>
+```
+
+## Testes
+
+Para rodar os testes automatizados do backend:
+
+```powershell
+venv\Scripts\python src\manage.py test chatbot
+```
+
+A suite cobre:
+
+- gerenciamento de sessoes;
+- persistencia e recuperacao de historico;
+- endpoints da API;
+- integracao com banco de dados de teste;
+- grafo LangGraph com LLM mockado;
+- fabrica de LLM;
+- testes smoke de performance com LLM mockado.
+
+Os testes reais com Gemini ficam desativados por padrao para evitar consumo da chave de API. Para executa-los explicitamente:
+
+```powershell
+$env:RUN_GEMINI_INTEGRATION_TESTS="true"
+venv\Scripts\python src\manage.py test chatbot.test_gemini_integration
+```
+
+Esses testes fazem uma chamada real ao Gemini e podem demorar mais que a suite normal.
 
 ## Rotina comum de desenvolvimento
 

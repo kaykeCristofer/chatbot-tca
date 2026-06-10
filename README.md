@@ -257,27 +257,61 @@ Depois reinicie o Vite:
 npm run dev
 ```
 
+## Testes automatizados
+
+O projeto possui testes automatizados para backend e frontend.
+
+Backend:
+
+```bash
+cd backend
+venv\Scripts\python src\manage.py test chatbot
+```
+
+Essa suite cobre sessoes, historico, API, banco de dados, grafo LangGraph, fabrica de LLM e testes smoke de performance com LLM mockado.
+
+Frontend:
+
+```bash
+cd frontend
+npm run test
+```
+
+Essa suite usa Vitest e Testing Library para validar o cliente da API, modo mock, tratamento de erros e componentes principais do chat.
+
+Os testes reais com Gemini ficam desativados por padrao para evitar consumo da chave de API. Para executa-los explicitamente:
+
+```powershell
+cd backend
+$env:RUN_GEMINI_INTEGRATION_TESTS="true"
+venv\Scripts\python src\manage.py test chatbot.test_gemini_integration
+```
+
 ## Rotas principais da API
 
 - `GET /api/health`: verifica se o backend esta no ar.
+- `POST /api/token/pair`: autentica usuario e retorna tokens JWT.
 - `POST /api/chat`: envia mensagem para o chatbot.
-- `GET /api/sessions`: lista sessoes existentes.
-- `GET /api/history/{session_id}`: retorna o historico de uma sessao.
-- `DELETE /api/sessions/{session_id}`: remove uma sessao.
+- `GET /api/sessions`: lista sessoes do usuario autenticado.
+- `GET /api/history/{session_id}`: retorna o historico de uma sessao do usuario autenticado.
+- `DELETE /api/sessions/{session_id}`: remove uma sessao do usuario autenticado.
 
 ## Fluxo de conversa
 
-1. O frontend lista sessoes existentes.
-2. A primeira mensagem e enviada com `session_id: null`.
-3. O backend cria uma sessao e retorna o `session_id`.
-4. O frontend guarda esse ID e usa nas proximas mensagens.
-5. O historico fica salvo no banco de desenvolvimento.
+1. O usuario faz login no frontend com usuario e senha do Django.
+2. O frontend chama `POST /api/token/pair` e guarda os tokens JWT no `localStorage`.
+3. As chamadas protegidas enviam `Authorization: Bearer <access_token>`.
+4. O frontend lista sessoes do usuario autenticado.
+5. A primeira mensagem e enviada com `session_id: null`.
+6. O backend cria uma sessao vinculada ao usuario autenticado e retorna o `session_id`.
+7. Historico, listagem e exclusao ficam filtrados pelo usuario autenticado.
 
 ## Comandos uteis
 
 Frontend:
 
 ```bash
+npm run test
 npm run lint
 npm run build
 ```
@@ -285,6 +319,7 @@ npm run build
 Backend:
 
 ```bash
+python3 src/manage.py test chatbot
 python3 src/manage.py check
 python3 src/manage.py migrate
 ```

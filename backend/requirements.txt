@@ -3,6 +3,7 @@
 # ==========================================
 django>=5.0
 django-ninja>=1.0
+django-ninja-jwt>=0.10
 
 # ==========================================
 # LLM — LangChain core obrigatório

@@ -1,27 +1,37 @@
 # src/chatbot/models.py
 import uuid
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Session(models.Model):
     """
     Representa uma sessão de usuário.
     O ID é um UUID gerado automaticamente no momento da conexão.
-    Cada cliente que se conecta recebe uma Session única.
+    Agora cada sessão pertence a um usuário autenticado.
     """
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
         editable=False,
     )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="sessions",
+        help_text="O usuário dono desta sessão.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     last_activity = models.DateTimeField(auto_now=True)  # atualiza a cada mensagem
 
     class Meta:
         ordering = ["-last_activity"]
+        indexes = [
+            models.Index(fields=["user", "-last_activity"]),
+        ]
 
     def __str__(self):
-        return f"Session {self.id} — {self.last_activity:%d/%m/%Y %H:%M}"
+        return f"Session {self.id} ({self.user.username}) — {self.last_activity:%d/%m/%Y %H:%M}"
 
 
 class Message(models.Model):
