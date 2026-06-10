@@ -14,8 +14,11 @@ class ChatState(TypedDict):
     """
     Representa o estado que trafega entre os nós do grafo.
     Cada nó recebe esse dict, processa e devolve atualizado.
+    
+    IMPORTANTE: A sessão já vem validada pela autenticação JWT em api.py.
+    Ela pertence ao usuário autenticado, então é seguro usar sem validações adicionais.
     """
-    session: Session      # sessão do usuário (vinda do banco)
+    session: Session      # sessão do usuário autenticado (já validada em api.py)
     user_input: str       # pergunta que o usuário enviou
     history: list[BaseMessage]  # histórico carregado do banco
     response: str         # resposta gerada pelo LLM
