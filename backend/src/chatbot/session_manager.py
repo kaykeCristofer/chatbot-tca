@@ -19,6 +19,16 @@ async def validate_session_ownership(user: User, session_id: UUID) -> Session:
         raise HttpError(403, "Você não tem permissão para acessar esta sessão.")
 
 
+def validate_session_ownership_sync(user: User, session_id: UUID) -> Session:
+    """
+    Versão síncrona para endpoints que usam o ORM padrão do Django.
+    """
+    try:
+        return Session.objects.get(id=session_id, user=user)
+    except Session.DoesNotExist:
+        raise HttpError(403, "Você não tem permissão para acessar esta sessão.")
+
+
 async def get_or_create_session(user: User, session_id: UUID | None) -> Session:
     """
     Recebe o usuário autenticado e o session_id vindo da requisição.

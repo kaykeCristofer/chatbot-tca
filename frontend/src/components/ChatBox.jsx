@@ -107,9 +107,9 @@ export default function ChatBox() {
 
         setSessions(loadedSessions);
         setActiveSessionId(loadedSessions[0]?.id ?? null);
-      } catch {
+      } catch (requestError) {
         if (!ignore) {
-          setError("Não foi possível carregar as sessões do backend.");
+          setError(requestError.message || "Não foi possível carregar as sessões do backend.");
         }
       } finally {
         if (!ignore) {
@@ -154,9 +154,9 @@ export default function ChatBox() {
               : session,
           ),
         );
-      } catch {
+      } catch (requestError) {
         if (!ignore) {
-          setError("Não foi possível carregar o histórico da sessão.");
+          setError(requestError.message || "Não foi possível carregar o histórico da sessão.");
         }
       } finally {
         if (!ignore) {
@@ -216,8 +216,8 @@ export default function ChatBox() {
       setActiveSessionId(remainingSessions[0]?.id ?? null);
       setInputValue("");
       setCopiedSessionId(false);
-    } catch {
-      setError("Não foi possível excluir a sessão.");
+    } catch (requestError) {
+      setError(requestError.message || "Não foi possível excluir a sessão.");
     }
   }
 

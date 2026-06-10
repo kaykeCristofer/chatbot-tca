@@ -10,6 +10,7 @@ from .schemas import ChatRequest, ChatResponse, MessageOut, SessionOut
 from .session_manager import (
     get_or_create_session,
     validate_session_ownership,
+    validate_session_ownership_sync,
 )
 from .models import Session, Message
 from .graph import chat_graph
@@ -69,7 +70,7 @@ async def chat(request, body: ChatRequest):
 # ENDPOINT 2: LISTAR SESSÕES DO USUÁRIO
 # ==========================================
 @api.get("/sessions", response=list[SessionOut], auth=auth)
-async def list_sessions(request):
+def list_sessions(request):
     """
     Lista apenas as sessões do usuário autenticado.
     Garante isolamento entre usuários.
@@ -77,8 +78,8 @@ async def list_sessions(request):
     user: User = request.auth
     
     sessions = []
-    async for session in Session.objects.filter(user=user):
-        count = await Message.objects.filter(session=session).acount()
+    for session in Session.objects.filter(user=user):
+        count = Message.objects.filter(session=session).count()
         sessions.append(SessionOut(
             session_id=session.id,
             created_at=session.created_at,
@@ -92,7 +93,7 @@ async def list_sessions(request):
 # ENDPOINT 3: HISTÓRICO DE UMA SESSÃO
 # ==========================================
 @api.get("/history/{session_id}", response=list[MessageOut], auth=auth)
-async def get_history(request, session_id: UUID):
+def get_history(request, session_id: UUID):
     """
     Retorna o histórico completo de mensagens de uma sessão.
     Valida que a sessão pertence ao usuário autenticado.
@@ -100,10 +101,10 @@ async def get_history(request, session_id: UUID):
     user: User = request.auth
     
     # Valida ownership antes de retornar histórico
-    session = await validate_session_ownership(user, session_id)
+    session = validate_session_ownership_sync(user, session_id)
 
     messages = []
-    async for msg in Message.objects.filter(session=session):
+    for msg in Message.objects.filter(session=session):
         messages.append(MessageOut(
             role=msg.role,
             content=msg.content,
@@ -116,7 +117,7 @@ async def get_history(request, session_id: UUID):
 # ENDPOINT 4: DELETAR SESSÃO
 # ==========================================
 @api.delete("/sessions/{session_id}", auth=auth)
-async def delete_session(request, session_id: UUID):
+def delete_session(request, session_id: UUID):
     """
     Remove uma sessão e todo seu histórico do banco.
     Valida que a sessão pertence ao usuário autenticado.
@@ -124,9 +125,9 @@ async def delete_session(request, session_id: UUID):
     user: User = request.auth
     
     # Valida ownership antes de deletar
-    session = await validate_session_ownership(user, session_id)
+    session = validate_session_ownership_sync(user, session_id)
     
-    await session.adelete()
+    session.delete()
     return {"detail": "Sessão removida com sucesso."}
 
 
